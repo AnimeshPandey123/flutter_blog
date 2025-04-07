@@ -1,9 +1,9 @@
 class BlogPost {
-  final int? id;
-  final String title;
-  final String content;
-  final String image_path;
-  final String summary;
+   int? id;
+   String title;
+   String content;
+   String image_path;
+   String summary;
 
   BlogPost({this.id, 
             required this.title, 
@@ -30,5 +30,12 @@ class BlogPost {
       image_path: map['image_path'],
       summary: map['summary'],
     );
+  }
+
+  void update({String? title, String? summary, String? content, String? image_path}) {
+    if (title != null) this.title = title;
+    if (summary != null) this.summary = summary;
+    if (content != null) this.content = content;
+    if (image_path != null) this.image_path = image_path;
   }
 }

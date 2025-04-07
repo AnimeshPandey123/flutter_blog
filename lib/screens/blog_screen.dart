@@ -50,8 +50,8 @@ class BlogScreenState extends State<BlogScreen> {
         padding: EdgeInsets.all(16.0),
         child: _blogPost != null? Column(
             children: [
-              if (_blogPost!.image_path != null && _blogPost!.image_path!.isNotEmpty) 
-                    Image.file(File(_blogPost!.image_path!)),
+              if (_blogPost!.image_path.isNotEmpty) 
+                    Image.file(File(_blogPost!.image_path)),
                 Text(_blogPost!.title, 
                 style: const TextStyle(
                   fontSize: 20,

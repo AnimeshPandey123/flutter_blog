@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 class CreatePostScreen extends StatefulWidget {
   final Function(String, String, String, String) onPostCreated;
 
-  CreatePostScreen({required this.onPostCreated});
+  const CreatePostScreen({super.key, required this.onPostCreated});
 
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
@@ -29,21 +29,34 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final directory = await getApplicationDocumentsDirectory();
     final String path = directory.path;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    String image_path = '${path}/$timestamp' + '.png';
+    String imagePath = '$path/$timestamp' '.png';
 
     // copy the file to a new path
     if (_image != null) {
-      final File newImage = await _image!.copy(image_path);
+      final File newImage = await _image!.copy(imagePath);
     }
-    return image_path;
+    return imagePath;
   }
 
   void _submitPost() async {
-    if (_titleController.text.isEmpty || _contentController.text.isEmpty) return;
+    if (_titleController.text.isEmpty || _contentController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Title and Content are required!'))
+      );
+      return;
+    }
+
+    if (_image == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please select an image!'))
+    );
+    return;
+  }
     // getting a directory path for saving
     
-    String image_path = await getCopiedFile();
-    widget.onPostCreated(_titleController.text, _contentController.text, _summaryController.text, image_path);
+    String imagePath = await getCopiedFile();
+
+    widget.onPostCreated(_titleController.text, _contentController.text, _summaryController.text, imagePath);
     Navigator.pop(context);
   }
 
@@ -123,8 +136,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               maxLines: 5,
             ),
             TextButton(
-              child: Text('Select Image'),
               onPressed: showOptions,
+              child: Text('Select Image'),
             ),
             Center(
               child: _image == null ? Text('No Image selected') : Image.file(_image!),

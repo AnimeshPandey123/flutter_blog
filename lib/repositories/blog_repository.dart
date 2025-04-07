@@ -4,9 +4,9 @@ import '../models/blog_post.dart';
 class BlogRepository {
 
   //Create Blog
-  Future<int> insertBlog(String title, String content,String summary, String image_path  ) async {
+  Future<int> insertBlog(String title, String content,String summary, String imagePath  ) async {
     final db = await DatabaseHelper.instance.database;
-    return await db.insert('blogs', {'title': title, 'content': content, 'summary': summary, 'image_path': image_path});
+    return await db.insert('blogs', {'title': title, 'content': content, 'summary': summary, 'image_path': imagePath});
   }
 
   //Fetch all blogs
@@ -17,7 +17,7 @@ class BlogRepository {
   }
 
   // Fetch a single blog by ID
-  Future<BlogPost?> fetchBlogById(int id) async {
+  Future<BlogPost> fetchBlogById(int id) async {
     final db = await DatabaseHelper.instance.database;
 
     final List<Map<String, dynamic>> maps = await db.query(
@@ -28,8 +28,8 @@ class BlogRepository {
 
     if (maps.isNotEmpty) {
       return BlogPost.fromMap(maps.first);
-    } else {
-      return null;
+    }else {
+      throw Exception("Blog not found.");
     }
   }
 

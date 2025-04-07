@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../repositories/blog_repository.dart';
 import '../models/blog_post.dart';
 import 'create_post_screen.dart';
+import 'update_post_screen.dart';
+
 import 'blog_screen.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class BlogHomePage extends StatefulWidget {
   const BlogHomePage({super.key});
@@ -28,8 +33,26 @@ class BlogHomePageState extends State<BlogHomePage> {
     });
   }
 
-  Future<void> _addNewPost(String title, String summary, String content, String image_path) async {
-    await blogRepo.insertBlog(title, content, summary, image_path);
+  Future<void> _addNewPost(String title, String summary, String content, String imagePath) async {
+    await blogRepo.insertBlog(title, content, summary, imagePath);
+    _loadBlogs();
+  }
+
+  Future<void> _updatePost(int id, String title, String summary, String content, String image_path) async {
+    BlogPost blog = await blogRepo.fetchBlogById(id);
+    blog.update(
+    title: title,
+    summary: summary,
+    content: content,
+    image_path: image_path,
+  );
+    await blogRepo.updateBlog(blog);
+    _loadBlogs();
+  }
+
+
+  Future<void> _deletePost(int id) async {
+    await blogRepo.deleteBlog(id);
     _loadBlogs();
   }
 
@@ -38,6 +61,24 @@ class BlogHomePageState extends State<BlogHomePage> {
       context,
       MaterialPageRoute(
         builder: (context) => CreatePostScreen(onPostCreated: _addNewPost),
+      ),
+    );
+  }
+
+  Future<void> _navigateToBlogUpdate(id) async {
+
+    BlogPost blog = await blogRepo.fetchBlogById(id);
+    print(blog);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdatePostScreen(
+          id: id, 
+          existingTitle: blog.title, 
+          existingSummary: blog.summary,
+          existingContent: blog.content, 
+          existingImagePath: blog.image_path,
+          onPostUpdated: _updatePost),
       ),
     );
   }
@@ -51,6 +92,7 @@ class BlogHomePageState extends State<BlogHomePage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,12 +103,48 @@ class BlogHomePageState extends State<BlogHomePage> {
               itemCount: _blogPosts.length,
               itemBuilder: (context, index) {
                 final post = _blogPosts[index];
-                return ListTile(
-                  title: Text(post.title),
-                  subtitle: Text(post.summary),
-                  onTap: () => _navigateToBlogDetail(post.id), // Navigate to detail screen
-
+                return Slidable(
+                  key: ValueKey(post),
+                  endActionPane: ActionPane(
+                    motion: ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) => _navigateToBlogUpdate(post.id),
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        icon: Icons.edit,
+                        label: 'Edit',
+                      ),
+                      SlidableAction(
+                        onPressed: (context) => _deletePost(post.id!),
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    leading: post.image_path.isNotEmpty
+                      ? Image.file(
+                          File(post.image_path),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        )
+                      : const Icon(Icons.image, size: 60),
+                    title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(post.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    onTap: () => _navigateToBlogDetail(post.id),
+                  ),
                 );
+
+                // return ListTile(
+                //   title: Text(post.title),
+                //   subtitle: Text(post.summary),
+                //   onTap: () => _navigateToBlogDetail(post.id), // Navigate to detail screen
+
+                // );
               },
             ),
       floatingActionButton: FloatingActionButton(
