@@ -116,7 +116,7 @@ class BlogHomePageState extends State<BlogHomePage> {
                         onPressed: (context) => ({print(post.isFeatured)}),
                         backgroundColor: Colors.amber,
                         foregroundColor: Colors.white,
-                        icon: post.isFeatured ? Icons.star : Icons.favorite,
+                        icon: post.isFeatured ? Icons.star : Icons.star_border,
                         label: post.isFeatured ? 'Unfeature' : 'Feature',
                       ),
                       SlidableAction(
