@@ -6,7 +6,7 @@ import '../database/database_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await DatabaseHelper.instance.deleteDB();
+  // await DatabaseHelper.instance.deleteDB();
 
   runApp(BlogApp());
 }

@@ -17,12 +17,19 @@ class BlogHomePage extends StatefulWidget {
 }
 class BlogHomePageState extends State<BlogHomePage> {
   List<BlogPost> _blogPosts = [];
+  List<BlogPost> _featuredPosts = []; // <- ✅ Add this line
+
   final BlogRepository blogRepo = BlogRepository();
 
   @override
   void initState() {
     super.initState();
+    _initializePage();
+  }
+
+  void _initializePage() {
     _loadBlogs();
+    _loadFeaturedBlogs();
   }
 
   Future<void> _loadBlogs() async {
@@ -32,10 +39,18 @@ class BlogHomePageState extends State<BlogHomePage> {
       _blogPosts = blogsData.map((e) => BlogPost.fromMap(e)).toList();
     });
   }
+  Future<void> _loadFeaturedBlogs() async {
+    final featuredData = await blogRepo.fetchFeaturedBlogs();
+
+    setState(() {
+      _featuredPosts = featuredData.map((e) => BlogPost.fromMap(e)).toList();
+
+    });
+  }
 
   Future<void> _addNewPost(String title, String summary, String content, String imagePath, bool isFeatured) async {
     await blogRepo.insertBlog(title, content, summary, imagePath, isFeatured: isFeatured);
-    _loadBlogs();
+    _initializePage();
   }
 
 
@@ -49,14 +64,14 @@ class BlogHomePageState extends State<BlogHomePage> {
       isFeatured: isFeatured,
     );
     await blogRepo.updateBlog(blog);
-    _loadBlogs();
+    _initializePage();
   }
 
 
 
   Future<void> _deletePost(int id) async {
     await blogRepo.deleteBlog(id);
-    _loadBlogs();
+    _initializePage();
   }
 
   void _navigateToCreatePost() {
@@ -101,9 +116,89 @@ class BlogHomePageState extends State<BlogHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Blog Posts')),
-      body: _blogPosts.isEmpty
-          ? const Center(child: Text('No blog posts yet. Add some!'))
-          : ListView.builder(
+      body: _blogPosts.isEmpty && _featuredPosts.isEmpty
+    ? const Center(child: Text('No blog posts yet. Add some!'))
+    : SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_featuredPosts.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Featured Posts',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                height: 220,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _featuredPosts.length,
+                  itemBuilder: (context, index) {
+                    final featured = _featuredPosts[index];
+                    return GestureDetector(
+                      onTap: () => _navigateToBlogDetail(featured.id),
+                      child: Container(
+                        width: 280,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              featured.image_path.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          topRight: Radius.circular(12)),
+                                      child: Image.file(
+                                        File(featured.image_path),
+                                        width: 280,
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : const SizedBox(
+                                      width: 280,
+                                      height: 120,
+                                      child: Icon(Icons.image, size: 60),
+                                    ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  featured.title,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  featured.summary,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: _blogPosts.length,
               itemBuilder: (context, index) {
                 final post = _blogPosts[index];
@@ -137,34 +232,31 @@ class BlogHomePageState extends State<BlogHomePage> {
                   ),
                   child: ListTile(
                     leading: post.image_path.isNotEmpty
-                          ? Container(
-                              width: 60,
-                              height: 60,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: Image.file(
-                                  File(post.image_path),
-                                  fit: BoxFit.cover,
-                                  width: 60,
-                                  height: 60,
-                                ),
+                        ? Container(
+                            width: 60,
+                            height: 60,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.file(
+                                File(post.image_path),
+                                fit: BoxFit.cover,
+                                width: 60,
+                                height: 60,
                               ),
-                            )
-                          : const Icon(Icons.image, size: 60),
+                            ),
+                          )
+                        : const Icon(Icons.image, size: 60),
                     title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(post.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
                     onTap: () => _navigateToBlogDetail(post.id),
                   ),
                 );
-
-                // return ListTile(
-                //   title: Text(post.title),
-                //   subtitle: Text(post.summary),
-                //   onTap: () => _navigateToBlogDetail(post.id), // Navigate to detail screen
-
-                // );
               },
             ),
+          ],
+        ),
+      ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreatePost,
         child: const Icon(Icons.add),
