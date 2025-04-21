@@ -43,21 +43,21 @@ class DatabaseHelper {
     //   )
     // ''');
 
-    // await db.execute('''
-    //   CREATE TABLE tags (
-    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    //     name TEXT NOT NULL UNIQUE
-    //   )
-    // ''');
+    await db.execute('''
+      CREATE TABLE tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+      )
+    ''');
 
-    // await db.execute('''
-    //   CREATE TABLE blog_tags (
-    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    //     blog_id INTEGER NOT NULL,
-    //     tag_id INTEGER NOT NULL,
-    //     FOREIGN KEY(blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
-    //     FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
-    //   )
-    // ''');
+    await db.execute('''
+      CREATE TABLE blog_tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        blog_id INTEGER NOT NULL,
+        tag_id INTEGER NOT NULL,
+        FOREIGN KEY(blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
+        FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    ''');
   }
 }

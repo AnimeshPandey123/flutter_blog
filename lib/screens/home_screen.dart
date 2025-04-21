@@ -104,7 +104,7 @@ class BlogHomePageState extends State<BlogHomePage> {
               itemBuilder: (context, index) {
                 final post = _blogPosts[index];
                 return Slidable(
-                  key: ValueKey(post),
+                  key: ValueKey(post.id),
                   endActionPane: ActionPane(
                     motion: ScrollMotion(),
                     children: [
@@ -126,13 +126,20 @@ class BlogHomePageState extends State<BlogHomePage> {
                   ),
                   child: ListTile(
                     leading: post.image_path.isNotEmpty
-                      ? Image.file(
-                          File(post.image_path),
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.image, size: 60),
+                          ? Container(
+                              width: 60,
+                              height: 60,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: Image.file(
+                                  File(post.image_path),
+                                  fit: BoxFit.cover,
+                                  width: 60,
+                                  height: 60,
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.image, size: 60),
                     title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(post.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
                     onTap: () => _navigateToBlogDetail(post.id),
