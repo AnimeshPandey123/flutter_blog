@@ -11,7 +11,8 @@ class UpdatePostScreen extends StatefulWidget {
   final String existingSummary;
   final String existingContent;
   final String existingImagePath;
-  final Future<void> Function(int, String, String, String, String) onPostUpdated;
+  final bool existingIsFeatured;
+  final Future<void> Function(int, String, String, String, String, bool) onPostUpdated;
 
   const UpdatePostScreen({
     super.key,
@@ -20,6 +21,7 @@ class UpdatePostScreen extends StatefulWidget {
     required this.existingSummary,
     required this.existingContent,
     required this.existingImagePath,
+    this.existingIsFeatured = false,
     required this.onPostUpdated,
   });
 
@@ -31,6 +33,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   late TextEditingController _summaryController;
+  late bool _isFeatured;
   File? _image;
   final picker = ImagePicker();
 
@@ -40,6 +43,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     _titleController = TextEditingController(text: widget.existingTitle);
     _contentController = TextEditingController(text: widget.existingContent);
     _summaryController = TextEditingController(text: widget.existingSummary);
+    _isFeatured = widget.existingIsFeatured;
     if (widget.existingImagePath.isNotEmpty) {
       _image = File(widget.existingImagePath);
     }
@@ -47,6 +51,12 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
 
   Future<String> getCopiedFile() async {
     if (_image == null) return widget.existingImagePath;
+    
+    // Check if we're already using the existing image path
+    if (_image!.path == widget.existingImagePath) {
+      return widget.existingImagePath;
+    }
+    
     final directory = await getApplicationDocumentsDirectory();
     final String path = directory.path;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -65,19 +75,20 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     }
 
     if (_image == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Please select an image!'))
-    );
-    return;
-  }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image!'))
+      );
+      return;
+    }
 
     String imagePath = await getCopiedFile();
     widget.onPostUpdated(
       widget.id,
       _titleController.text,
-      _contentController.text,
       _summaryController.text,
+      _contentController.text,
       imagePath,
+      _isFeatured,
     );
     Navigator.pop(context);
   }
@@ -123,6 +134,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _titleController,
@@ -138,6 +150,21 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                 decoration: InputDecoration(labelText: 'Content'),
                 maxLines: 5,
               ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _isFeatured,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isFeatured = value ?? false;
+                      });
+                    },
+                  ),
+                  Text('Feature this post'),
+                ],
+              ),
+              SizedBox(height: 10),
               TextButton(
                 onPressed: showOptions,
                 child: Text('Select Image'),
@@ -148,9 +175,11 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                     : Image.file(_image!, height: 200),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitPost,
-                child: Text('Update Post'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _submitPost,
+                  child: Text('Update Post'),
+                ),
               ),
             ],
           ),

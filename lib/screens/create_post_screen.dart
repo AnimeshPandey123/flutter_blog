@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  final Function(String, String, String, String) onPostCreated;
+  final Function(String, String, String, String, bool) onPostCreated;
 
   const CreatePostScreen({super.key, required this.onPostCreated});
 
@@ -15,12 +15,10 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-
-
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _summaryController = TextEditingController();
-  // final _imageController;
+  bool _isFeatured = false;
 
   File? _image;
   final picker = ImagePicker();
@@ -47,16 +45,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     if (_image == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Please select an image!'))
-    );
-    return;
-  }
-    // getting a directory path for saving
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image!'))
+      );
+      return;
+    }
     
     String imagePath = await getCopiedFile();
 
-    widget.onPostCreated(_titleController.text, _contentController.text, _summaryController.text, imagePath);
+    widget.onPostCreated(
+      _titleController.text, 
+      _summaryController.text, 
+      _contentController.text, 
+      imagePath,
+      _isFeatured
+    );
     Navigator.pop(context);
   }
 
@@ -118,41 +121,63 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         child: ConstrainedBox(
           constraints: BoxConstraints(),
           child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(labelText: 'Title'),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: _summaryController,
+                  decoration: InputDecoration(labelText: 'Summary'),
+                  maxLines: 5,
+                ),
+                TextField(
+                  controller: _contentController,
+                  decoration: InputDecoration(labelText: 'Content'),
+                  maxLines: 5,
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isFeatured,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _isFeatured = value ?? false;
+                        });
+                      },
+                    ),
+                    Text('Feature this post'),
+                  ],
+                ),
+                SizedBox(height: 10),
+                TextButton(
+                  onPressed: showOptions,
+                  child: Text('Select Image'),
+                ),
+                Center(
+                  child: _image == null 
+                    ? Text('No Image selected') 
+                    : Container(
+                        height: 200,
+                        child: Image.file(_image!, fit: BoxFit.contain),
+                      ),
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _submitPost,
+                    child: Text('Add Post'),
+                  ),
+                ),
+              ],
             ),
-            TextField(
-              controller: _summaryController,
-              decoration: InputDecoration(labelText: 'Summary'),
-              maxLines: 5,
-            ),
-            TextField(
-              controller: _contentController,
-              decoration: InputDecoration(labelText: 'Content'),
-              maxLines: 5,
-            ),
-            TextButton(
-              onPressed: showOptions,
-              child: Text('Select Image'),
-            ),
-            Center(
-              child: _image == null ? Text('No Image selected') : Image.file(_image!),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitPost,
-              child: Text('Add Post'),
-            ),
-          ],
-        ),
-      ),
+          ),
         )
       )
-  
     );
   }
 }

@@ -33,22 +33,25 @@ class BlogHomePageState extends State<BlogHomePage> {
     });
   }
 
-  Future<void> _addNewPost(String title, String summary, String content, String imagePath) async {
-    await blogRepo.insertBlog(title, content, summary, imagePath);
+  Future<void> _addNewPost(String title, String summary, String content, String imagePath, bool isFeatured) async {
+    await blogRepo.insertBlog(title, content, summary, imagePath, isFeatured: isFeatured);
     _loadBlogs();
   }
 
-  Future<void> _updatePost(int id, String title, String summary, String content, String image_path) async {
+
+  Future<void> _updatePost(int id, String title, String summary, String content, String image_path, bool isFeatured) async {
     BlogPost blog = await blogRepo.fetchBlogById(id);
     blog.update(
-    title: title,
-    summary: summary,
-    content: content,
-    image_path: image_path,
-  );
+      title: title,
+      summary: summary,
+      content: content,
+      image_path: image_path,
+      isFeatured: isFeatured,
+    );
     await blogRepo.updateBlog(blog);
     _loadBlogs();
   }
+
 
 
   Future<void> _deletePost(int id) async {
@@ -78,6 +81,7 @@ class BlogHomePageState extends State<BlogHomePage> {
           existingSummary: blog.summary,
           existingContent: blog.content, 
           existingImagePath: blog.image_path,
+          existingIsFeatured: blog.isFeatured,
           onPostUpdated: _updatePost),
       ),
     );
@@ -108,6 +112,13 @@ class BlogHomePageState extends State<BlogHomePage> {
                   endActionPane: ActionPane(
                     motion: ScrollMotion(),
                     children: [
+                      SlidableAction(
+                        onPressed: (context) => ({print(post.isFeatured)}),
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.white,
+                        icon: post.isFeatured ? Icons.star : Icons.favorite,
+                        label: post.isFeatured ? 'Unfeature' : 'Feature',
+                      ),
                       SlidableAction(
                         onPressed: (context) => _navigateToBlogUpdate(post.id),
                         backgroundColor: Colors.blue,

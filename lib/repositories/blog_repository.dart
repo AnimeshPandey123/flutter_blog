@@ -4,16 +4,31 @@ import '../models/blog_post.dart';
 class BlogRepository {
 
   //Create Blog
-  Future<int> insertBlog(String title, String content,String summary, String imagePath  ) async {
+  Future<int> insertBlog(String title, String content, String summary, String imagePath, {bool isFeatured = false}) async {
     final db = await DatabaseHelper.instance.database;
-    return await db.insert('blogs', {'title': title, 'content': content, 'summary': summary, 'image_path': imagePath});
+    return await db.insert('blogs', {
+      'title': title, 
+      'content': content, 
+      'summary': summary, 
+      'image_path': imagePath,
+      'is_featured': isFeatured ? 1 : 0
+    });
   }
 
   //Fetch all blogs
   Future<List<Map<String, dynamic>>> fetchBlogs() async {
     final db = await DatabaseHelper.instance.database;
-
     return await db.query('blogs');
+  }
+  
+  //Fetch featured blogs
+  Future<List<Map<String, dynamic>>> fetchFeaturedBlogs() async {
+    final db = await DatabaseHelper.instance.database;
+    return await db.query(
+      'blogs',
+      where: 'is_featured = ?',
+      whereArgs: [1],
+    );
   }
 
   // Fetch a single blog by ID
@@ -28,14 +43,13 @@ class BlogRepository {
 
     if (maps.isNotEmpty) {
       return BlogPost.fromMap(maps.first);
-    }else {
+    } else {
       throw Exception("Blog not found.");
     }
   }
 
   // Update an existing blog
   Future<int> updateBlog(BlogPost blog) async {
-
     final db = await DatabaseHelper.instance.database;
 
     return await db.update(
@@ -46,9 +60,20 @@ class BlogRepository {
     );
   }
 
+  // Toggle featured status
+  Future<int> toggleFeatured(int id, bool isFeatured) async {
+    final db = await DatabaseHelper.instance.database;
+
+    return await db.update(
+      'blogs',
+      {'is_featured': isFeatured ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   // Delete a blog by ID
   Future<int> deleteBlog(int id) async {
-
     final db = await DatabaseHelper.instance.database;
 
     return await db.delete(

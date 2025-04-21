@@ -27,7 +27,8 @@ class DatabaseHelper {
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         image_path TEXT NULL,
-        summary, TEXT NULL
+        summary TEXT NULL,
+        is_featured INTEGER DEFAULT 0
       )
     ''');
 
@@ -59,5 +60,13 @@ class DatabaseHelper {
         FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
       )
     ''');
+  }
+
+  Future<void> deleteDB() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'blogs.db'); // same name used in _initDB
+    await deleteDatabase(path);
+    _database = null; // reset cached db
+    print('Database deleted');
   }
 }

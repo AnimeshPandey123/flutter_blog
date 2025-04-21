@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import '../database/database_helper.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await DatabaseHelper.instance.deleteDB();
+
   runApp(BlogApp());
 }
 
 class BlogApp extends StatelessWidget {
+
   const BlogApp({super.key});
 
   @override
