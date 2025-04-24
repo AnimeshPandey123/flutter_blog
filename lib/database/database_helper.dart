@@ -32,34 +32,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // await db.execute('''
-    //   CREATE TABLE uploads (
-    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    //     blog_id INTEGER NOT NULL,
-    //     status TEXT NOT NULL CHECK(status IN ('pending', 'uploading','uploaded', 'failed')),,
-    //     FOREIGN KEY(blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
-    //     uploaded_at TEXT NULL,
-    //     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    //     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    //   )
-    // ''');
-
-    await db.execute('''
-      CREATE TABLE tags (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE blog_tags (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        blog_id INTEGER NOT NULL,
-        tag_id INTEGER NOT NULL,
-        FOREIGN KEY(blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
-        FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    ''');
   }
 
   Future<void> deleteDB() async {

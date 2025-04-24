@@ -306,7 +306,7 @@ class BlogScreenState extends State<BlogScreen> {
                 const SizedBox(height: 16),
                 _buildContentSection(),
                 const SizedBox(height: 40),
-                _buildActionButtons(),
+                // _buildActionButtons(),
                 const SizedBox(height: 24),
               ],
             ),
@@ -335,33 +335,6 @@ class BlogScreenState extends State<BlogScreen> {
             fontSize: 16,
             height: 1.7,
             color: Colors.grey[800],
-          ),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        OutlinedButton.icon(
-          onPressed: _sharePost,
-          icon: const Icon(Icons.share),
-          label: const Text('Share Post'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-        ),
-        const SizedBox(width: 16),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Back to List'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
       ],

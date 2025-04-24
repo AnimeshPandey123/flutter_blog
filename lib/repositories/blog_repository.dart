@@ -60,6 +60,17 @@ class BlogRepository {
     );
   }
 
+  // Search the blog
+  Future<List<Map<String, dynamic>>> searchBlogs(String query) async {
+    final db = await DatabaseHelper.instance.database;
+
+    return await db.query(
+      'blogs',
+      where: 'title LIKE ? OR content LIKE ? OR summary LIKE ?',
+      whereArgs: ['%$query%', '%$query%', '%$query%'],
+    );
+  }
+
   // Toggle featured status
   Future<int> toggleFeatured(int id, bool isFeatured) async {
     final db = await DatabaseHelper.instance.database;
