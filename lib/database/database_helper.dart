@@ -2,7 +2,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
+  static DatabaseHelper instance = DatabaseHelper._init();
+  
+  // Add this method to allow setting the instance in tests
+  static void setInstance(DatabaseHelper mockHelper) {
+    instance = mockHelper;
+  }
   static Database? _database;
 
   DatabaseHelper._init();
