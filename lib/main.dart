@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import '../database/database_helper.dart';
 
 
 void main() async {
@@ -18,7 +17,7 @@ class BlogApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simple Blog',
+      title: 'Blog',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: BlogHomePage(),
     );

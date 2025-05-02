@@ -49,6 +49,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     }
   }
 
+  // Copy file and returns the image path
   Future<String> getCopiedFile() async {
     if (_image == null) return widget.existingImagePath;
     
@@ -66,6 +67,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     return imagePath;
   }
 
+  // Submit the post
   void _submitPost() async {
     if (_titleController.text.isEmpty || _contentController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,6 +104,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     }
   }
 
+  // Show options of image upload either photo gallery or camera
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,

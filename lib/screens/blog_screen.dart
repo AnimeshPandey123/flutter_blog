@@ -46,6 +46,7 @@ class BlogScreenState extends State<BlogScreen> {
     }
   }
   
+  // Show error snackbar
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -56,6 +57,7 @@ class BlogScreenState extends State<BlogScreen> {
     );
   }
   
+  // Opens dialoge to share post
   void _sharePost() async {
     if (_blogPost == null) return;
     
@@ -90,6 +92,7 @@ class BlogScreenState extends State<BlogScreen> {
     }
   }
   
+  // Open dialoge to share image
   void _shareImage() async {
     if (_blogPost == null || _blogPost!.image_path.isEmpty) return;
     
