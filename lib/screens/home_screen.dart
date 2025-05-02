@@ -82,26 +82,48 @@ class BlogHomePageState extends State<BlogHomePage> {
     });
   }
 
+  void showSnackBar(String message){
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   Future<void> _addNewPost(String title, String summary, String content, String imagePath, bool isFeatured) async {
     await blogRepo.insertBlog(title, content, summary, imagePath, isFeatured: isFeatured);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('New post added successfully!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    showSnackBar('New post added successfully!');
     _initializePage();
   }
 
-  Future<void> _updatePost(int id, String title, String summary, String content, String image_path, bool isFeatured) async {
+  Future<void> _updatePost(int id, String title, String summary, String content, String imagePath, bool isFeatured) async {
     BlogPost blog = await blogRepo.fetchBlogById(id);
     blog.update(
       title: title,
       summary: summary,
       content: content,
-      image_path: image_path,
+      image_path: imagePath,
       isFeatured: isFeatured,
     );
     await blogRepo.updateBlog(blog);
+
+    showSnackBar('The post was updated successfully!');
+
     _initializePage();
   }
 
   Future<void> _deletePost(int id) async {
     await blogRepo.deleteBlog(id);
+    showSnackBar('The post was deleted successfully!');
+
     _initializePage();
   }
 
@@ -143,9 +165,25 @@ class BlogHomePageState extends State<BlogHomePage> {
     );
   }
 
+  Future<void> _toggleFeaturedBlog(int id) async {
+  try {
+    final blog = await blogRepo.fetchBlogById(id);
+    final updated = await blogRepo.toggleFeatured(id, !blog.isFeatured);
+
+    if (updated > 0) {
+      showSnackBar('The post was ${!blog.isFeatured ? 'featured' : 'unfeatured'} successfully!');
+      _initializePage();
+    } else {
+      showSnackBar('Failed to update the post.');
+    }
+  } catch (e) {
+    showSnackBar('An error occurred: $e');
+  }
+}
+
+
   Future<void> _navigateToBlogUpdate(id) async {
     BlogPost blog = await blogRepo.fetchBlogById(id);
-    print(blog);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -182,7 +220,7 @@ class BlogHomePageState extends State<BlogHomePage> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search blogs...',
+                hintText: 'Search blogs by title or content...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _isSearching
                     ? IconButton(
@@ -371,7 +409,7 @@ class BlogHomePageState extends State<BlogHomePage> {
                   motion: const ScrollMotion(),
                   children: [
                     SlidableAction(
-                      onPressed: (context) => ({print(post.isFeatured)}),
+                      onPressed: (context) => _toggleFeaturedBlog(post.id!),
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.white,
                       icon: post.isFeatured ? Icons.star : Icons.star_border,
